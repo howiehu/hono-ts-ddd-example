@@ -7,13 +7,19 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.13.8",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.40.0",
     "hono": "^4.7.4",
     "inversify": "^7.0.2",
+    "pg": "^8.13.3",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "^10.18.0",
     "@types/node": "^20.11.17",
-    "tsx": "^4.7.1",
+    "@types/pg": "^8.11.11",
+    "drizzle-kit": "^0.30.5",
+    "tsx": "^4.19.3",
     "typescript": "^5.8.2",
     "vitest": "^3.0.8"
   }
