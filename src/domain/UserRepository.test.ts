@@ -54,12 +54,12 @@ describe("UserRepository", { timeout: 60000 }, () => {
 
     // Bind dependencies - use the mock class directly instead of extending
     testContainer
-      .bind<Database>(Database)
+      .bind(Database)
       .toConstantValue(new TestDatabase() as unknown as Database);
-    testContainer.bind<UserRepository>(UserRepository).toSelf();
+    testContainer.bind(UserRepository).toSelf();
 
     // Get repository instance
-    userRepository = testContainer.get<UserRepository>(UserRepository);
+    userRepository = new UserRepository(testContainer.get(Database));
   });
 
   afterAll(async () => {
