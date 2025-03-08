@@ -1,16 +1,5 @@
-import User from "../models/User.js";
-import { type Drizzle } from "../infrastructure/database/Drizzle.js";
-import { inject, injectable } from "inversify";
-import { eq } from "drizzle-orm";
+import type User from "../models/User.js";
 
-@injectable()
-export default class UserRepository {
-  constructor(@inject(Symbol.for("Drizzle")) private readonly db: Drizzle) {}
-
-  async findById(id: number): Promise<User | null> {
-    const data = await this.db.query.usersTable.findFirst({
-      where: (usersTable) => eq(usersTable.id, id),
-    });
-    return data ? new User(data.id, data.name, data.age, data.email) : null;
-  }
+export default interface UserRepository {
+  findById(id: number): Promise<User | null>;
 }

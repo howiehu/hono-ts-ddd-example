@@ -3,7 +3,9 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch app/app.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:repository": "vitest run --project repository",
+    "test:api": "vitest run --project api"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.8",
