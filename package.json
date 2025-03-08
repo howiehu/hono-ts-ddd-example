@@ -2,7 +2,7 @@
   "name": "hono-ts-ddd-example",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch app/app.ts",
     "test": "vitest run"
   },
   "dependencies": {

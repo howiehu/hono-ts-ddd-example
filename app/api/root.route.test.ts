@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { app } from "./index.js";
+import app from "../app.hono.js";
 
 describe("Hono App", () => {
   it('should return "Hello Hono!" for GET /', async () => {

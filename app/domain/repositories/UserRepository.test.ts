@@ -4,67 +4,44 @@ import {
   StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { sql } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import * as schema from "../db/schema.js";
+import * as schema from "../infrastructure/database/Schema.js";
 import { Pool } from "pg";
-import User from "./User.js";
+import User from "../models/User.js";
 import UserRepository from "./UserRepository.js";
-import Database from "./Database.js";
+import type { Drizzle } from "../infrastructure/database/Drizzle.js";
 import "reflect-metadata";
 import { Container } from "inversify";
+import { createDIContainer } from "../../di.js";
 
 // Setting a longer timeout for all tests in this file
 describe("UserRepository", { timeout: 60000 }, () => {
-  let container: StartedPostgreSqlContainer;
+  let postgresContainer: StartedPostgreSqlContainer;
   let pool: Pool;
-  let db: NodePgDatabase<typeof schema>;
+  let db: Drizzle;
   let userRepository: UserRepository;
   let testContainer: Container;
 
   beforeAll(async () => {
-    container = await new PostgreSqlContainer("postgres:16.3-alpine").start();
+    postgresContainer = await new PostgreSqlContainer("postgres:16.3-alpine").start();
 
-    const databaseUrl = container.getConnectionUri();
+    const databaseUrl = postgresContainer.getConnectionUri();
 
     pool = new Pool({ connectionString: databaseUrl });
     db = drizzle(pool, { schema });
 
     const { execSync } = require("child_process");
     execSync(
-      `npx drizzle-kit push --force true --dialect postgresql --schema ./src/db/schema.ts --url ${databaseUrl}`
+      `npx drizzle-kit push --force true --dialect postgresql --schema ./app/domain/infrastructure/database/Schema.ts --url ${databaseUrl}`
     );
 
-    // Setup DI container
-    testContainer = new Container();
-
-    // Create a mock Database class instead of extending the original
-    class TestDatabase {
-      private readonly instance: NodePgDatabase<typeof schema>;
-
-      constructor() {
-        // Directly set the instance to our test database
-        this.instance = db;
-      }
-
-      public getInstance(): NodePgDatabase<typeof schema> {
-        return this.instance;
-      }
-    }
-
-    // Bind dependencies - use the mock class directly instead of extending
-    testContainer
-      .bind(Database)
-      .toConstantValue(new TestDatabase() as unknown as Database);
-    testContainer.bind(UserRepository).toSelf();
-
-    // Get repository instance
-    userRepository = new UserRepository(testContainer.get(Database));
+    testContainer = createDIContainer({testDb: db});
+    
+    userRepository = testContainer.get(UserRepository);
   });
 
   afterAll(async () => {
     await pool.end();
-    await container.stop();
+    await postgresContainer.stop();
   });
 
   beforeEach(async () => {
@@ -81,7 +58,7 @@ describe("UserRepository", { timeout: 60000 }, () => {
       })
       .returning({ id: schema.usersTable.id });
 
-    const user = await userRepository.findUserById(existingUser[0].id);
+    const user = await userRepository.findById(existingUser[0].id);
 
     expect(user).toBeInstanceOf(User);
     expect(user?.id).toBe(existingUser[0].id);
@@ -91,7 +68,7 @@ describe("UserRepository", { timeout: 60000 }, () => {
   });
 
   it("should return null for non-existent user id", async () => {
-    const user = await userRepository.findUserById(9999);
+    const user = await userRepository.findById(9999);
 
     expect(user).toBeNull();
   });
