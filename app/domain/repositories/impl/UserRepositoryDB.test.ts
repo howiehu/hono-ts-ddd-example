@@ -5,7 +5,7 @@ import { Pool } from "pg";
 import User from "../../models/User.js";
 import UserRepositoryDB from "./UserRepositoryDB.js";
 import type { Drizzle } from "../../infrastructure/database/drizzle.js";
-import { createDb, dropDb } from "./__test__/testdb.js";
+import { createDb, dropDb } from "./__test__/testDb.js";
 
 // Setting a longer timeout for all tests in this file
 describe("UserRepository", () => {
